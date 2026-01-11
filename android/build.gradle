@@ -11,7 +11,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.6.1'
+        classpath 'com.android.tools.build:gradle:8.13.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath("com.ncorti.ktfmt.gradle:plugin:0.17.0")
@@ -38,7 +38,8 @@ android {
         minSdkVersion 26
         targetSdkVersion 35
         versionCode 468
-        versionName getVersionProperty("VERSION_LONG")
+        // Fork version suffix is appended automatically
+        versionName getVersionProperty("VERSION_LONG", "1.92.2-pars5555")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // This setting, which defaults to 'true', will cause Tailscale to fall
@@ -186,11 +187,21 @@ def getLocalProperty(key, defaultValue) {
 }
 
 
-def getVersionProperty(key) {
-    // tailscale.version is created / updated by the makefile, it is in a loosely
-    // Makfile/envfile format, which is also loosely a properties file format.
-    //      make tailscale.version
-    def versionProps = new Properties()
-    versionProps.load(project.file('../tailscale.version').newDataInputStream())
-    return versionProps.getProperty(key).replaceAll('^\"|\"$', '')
+// Custom fork suffix - change this to customize your version
+def FORK_SUFFIX = "-pars5555"
+
+def getVersionProperty(key, defaultValue = "") {
+    try {
+        def versionProps = new Properties()
+        versionProps.load(project.file('../tailscale.version').newDataInputStream())
+        def value = (versionProps.getProperty(key) ?: defaultValue)
+                .replaceAll('^\"|\"$', '')
+        // Append fork suffix to VERSION_LONG (strips -dev first if present)
+        if (key == "VERSION_LONG" && value) {
+            value = value.replaceAll('-dev$', '') + FORK_SUFFIX
+        }
+        return value
+    } catch(Throwable ignored) {
+        return defaultValue
+    }
 }
