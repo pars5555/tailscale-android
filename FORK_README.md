@@ -2,6 +2,19 @@
 
 This is a custom fork of the [Tailscale Android client](https://github.com/tailscale/tailscale-android) with additional features for external app integration and automation.
 
+## Quick Summary
+
+- ✅ **ContentProvider API** - External apps can query/control VPN via `content://com.tailscale.ipn.provider`
+- ✅ **Disallow App Feature** - Bypass VPN for specific apps (e.g., banking apps)
+- ✅ **Broadcast Intents** - CONNECT, DISCONNECT, USE_EXIT_NODE, DISALLOW_APP, ALLOW_APP, GET_EXIT_NODE, GET_DISALLOWED_APPS
+- ✅ **Custom Version Suffix** - Automatically appends `-pars5555` to version in admin panel
+- ✅ **Clean Versions** - Strips `-dev` suffix for cleaner version numbers
+- ✅ **WSL Build Script** - Easy `libtailscale.aar` building on Windows via `build_libtailscale.sh`
+- ✅ **Simplified Toolchain** - Uses system Go instead of Tailscale's custom toolchain
+- ✅ **Upstream Remote** - Configured for easy merging of future Tailscale updates
+
+---
+
 ## Fork Features
 
 ### 1. ContentProvider API (`TailscaleProvider`)
