@@ -97,6 +97,10 @@
                 <action android:name="com.tailscale.ipn.CONNECT_VPN" />
                 <action android:name="com.tailscale.ipn.DISCONNECT_VPN" />
                 <action android:name="com.tailscale.ipn.USE_EXIT_NODE" />
+                <action android:name="com.tailscale.ipn.GET_EXIT_NODE" />
+                <action android:name="com.tailscale.ipn.DISALLOW_APP" />
+                <action android:name="com.tailscale.ipn.ALLOW_APP" />
+                <action android:name="com.tailscale.ipn.GET_DISALLOWED_APPS" />
             </intent-filter>
         </receiver>
 
