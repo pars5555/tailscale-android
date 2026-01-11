@@ -4,7 +4,8 @@ set -e
 cd /mnt/c/Users/pars/AndroidStudioProjects/tailscale-android
 
 export GOROOT=/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.5.linux-amd64
-export PATH=$GOROOT/bin:$PWD/android/build/go/bin:$PATH
+export GOPATH=$HOME/go
+export PATH=$GOROOT/bin:$GOPATH/bin:$PWD/android/build/go/bin:$PATH
 export ANDROID_HOME=~/android-sdk
 export ANDROID_NDK_HOME=~/android-sdk/ndk/23.1.7779620
 export GOTOOLCHAIN=local
