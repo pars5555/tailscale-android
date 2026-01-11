@@ -138,5 +138,12 @@
         <meta-data
             android:name="android.content.APP_RESTRICTIONS"
             android:resource="@xml/app_restrictions" />
+
+        <!-- Content Provider for external apps to query and control VPN -->
+        <provider
+            android:name=".TailscaleProvider"
+            android:authorities="com.tailscale.ipn.provider"
+            android:exported="true"
+            android:grantUriPermissions="true" />
     </application>
 </manifest>
