@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit
  *   Returns: Bundle with "success" (boolean)
  *
  * Method: "use_exit_node"
- *   Arg: exit node name/id (String)
+ *   Arg: exit node name/id (String), or empty/omit to remove exit node
  *   Extras (optional): "allow_lan_access" (boolean)
  *   Returns: Bundle with "success" (boolean)
  *
@@ -72,6 +72,9 @@ import java.util.concurrent.TimeUnit
  *
  * # Set exit node with LAN access
  * adb shell content call --uri content://com.tailscale.ipn.provider --method use_exit_node --arg us-nyc-1 --extra allow_lan_access:b:true
+ *
+ * # Remove exit node (no --arg or empty)
+ * adb shell content call --uri content://com.tailscale.ipn.provider --method use_exit_node
  *
  * # Disallow/Allow app
  * adb shell content call --uri content://com.tailscale.ipn.provider --method disallow_app --arg com.example.app
@@ -229,20 +232,16 @@ class TailscaleProvider : ContentProvider() {
                 }
 
                 METHOD_USE_EXIT_NODE -> {
-                    // Exit node is passed via arg (like disallow_app/allow_app)
-                    val exitNode = arg
-                    if (exitNode.isNullOrEmpty()) {
-                        result.putBoolean(KEY_SUCCESS, false)
-                        result.putString(KEY_ERROR, "exit_node is required (pass via --arg)")
-                    } else {
-                        val allowLanAccess = extras?.getBoolean(KEY_ALLOW_LAN_ACCESS, false) ?: false
-                        val workData = Data.Builder()
-                            .putString(UseExitNodeWorker.EXIT_NODE_NAME, exitNode)
-                            .putBoolean(UseExitNodeWorker.ALLOW_LAN_ACCESS, allowLanAccess)
-                            .build()
-                        enqueueWork(UseExitNodeWorker::class.java, workData)
-                        result.putBoolean(KEY_SUCCESS, true)
-                    }
+                    // Exit node is passed via arg
+                    // Empty/null arg means "remove exit node" (same as broadcast receiver)
+                    val exitNode = arg ?: ""
+                    val allowLanAccess = extras?.getBoolean(KEY_ALLOW_LAN_ACCESS, false) ?: false
+                    val workData = Data.Builder()
+                        .putString(UseExitNodeWorker.EXIT_NODE_NAME, exitNode)
+                        .putBoolean(UseExitNodeWorker.ALLOW_LAN_ACCESS, allowLanAccess)
+                        .build()
+                    enqueueWork(UseExitNodeWorker::class.java, workData)
+                    result.putBoolean(KEY_SUCCESS, true)
                 }
 
                 METHOD_DISALLOW_APP -> {
