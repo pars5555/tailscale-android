@@ -37,7 +37,7 @@ android {
     defaultConfig {
         minSdkVersion 26
         targetSdkVersion 35
-        versionCode 468
+        versionCode 1468
         // Fork version suffix is appended automatically
         versionName getVersionProperty("VERSION_LONG", "1.92.2-pars5555")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
