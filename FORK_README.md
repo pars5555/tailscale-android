@@ -285,9 +285,9 @@ wsl -e bash -c "cd /mnt/c/Users/pars/AndroidStudioProjects/tailscale-android && 
 # 5. Rebuild libtailscale with your version suffix
 wsl -e bash /mnt/c/Users/pars/AndroidStudioProjects/tailscale-android/build_libtailscale.sh
 
-# 6. Rebuild the Android app
+# 6. Rebuild the Android app (use assembleRelease for smaller APK)
 cd android
-.\gradlew clean assembleDebug
+.\gradlew clean assembleRelease
 
 # 7. Push to your fork
 cd ..
@@ -295,6 +295,67 @@ git push origin main
 ```
 
 After updating, your admin panel will show the new upstream version with your suffix (e.g., `1.95.0-pars5555`).
+
+---
+
+## Creating a GitHub Release
+
+### Step 1: Update version file
+
+Edit `tailscale.version` with the new version (check upstream release for version number):
+
+```
+VERSION_LONG=1.XX.X
+VERSION=1.XX.X
+SHORT_VERSION=1.XX
+COMMIT=xxxxxxx
+DIRTY=false
+CHANNEL=stable
+```
+
+### Step 2: Rebuild everything
+
+```powershell
+# Rebuild libtailscale
+wsl -e bash -c "sed -i 's/\r$//' /mnt/c/Users/pars/AndroidStudioProjects/tailscale-android/build_libtailscale.sh && bash /mnt/c/Users/pars/AndroidStudioProjects/tailscale-android/build_libtailscale.sh"
+
+# Build release APK (optimized, smaller size)
+cd android
+.\gradlew clean assembleRelease
+```
+
+### Step 3: Sign the APK
+
+```powershell
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+& "$env:ANDROID_HOME\build-tools\35.0.0\apksigner.bat" sign --ks "$env:USERPROFILE\.android\debug.keystore" --ks-pass pass:android --out build\outputs\apk\release\tailscale-android-pars5555-universal-1.XX.X.apk build\outputs\apk\release\android-release-unsigned.apk
+```
+
+### Step 4: Create GitHub release
+
+```powershell
+# Install GitHub CLI if not installed
+winget install GitHub.cli
+
+# Login (one-time)
+& "C:\Program Files\GitHub CLI\gh.exe" auth login
+
+# Create release
+& "C:\Program Files\GitHub CLI\gh.exe" api repos/pars5555/tailscale-android/releases -X POST -f tag_name="v1.XX.X-pars5555" -f name="v1.XX.X-pars5555" -f body="Release notes here" -F draft=false -F prerelease=false
+```
+
+### Step 5: Upload APK
+
+Get the release ID from the output of Step 4, then:
+
+```powershell
+& "C:\Program Files\GitHub CLI\gh.exe" api "https://uploads.github.com/repos/pars5555/tailscale-android/releases/RELEASE_ID/assets?name=tailscale-android-pars5555-universal-1.XX.X.apk" -X POST -H "Content-Type: application/vnd.android.package-archive" --input android/build/outputs/apk/release/tailscale-android-pars5555-universal-1.XX.X.apk
+```
+
+### APK Naming Convention
+
+- Official Tailscale: `tailscale-android-universal-X.XX.X.apk`
+- This fork: `tailscale-android-pars5555-universal-X.XX.X.apk`
 
 ---
 
