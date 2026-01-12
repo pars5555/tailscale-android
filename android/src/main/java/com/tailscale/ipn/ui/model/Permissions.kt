@@ -4,10 +4,12 @@
 package com.tailscale.ipn.ui.model
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
@@ -21,9 +23,14 @@ object Permissions {
   val prompt: List<Pair<Permission, PermissionState>>
     @Composable
     get() {
+      val context = LocalContext.current
       val permissionStates = rememberMultiplePermissionsState(permissions = all.map { it.name })
-      return all.zip(permissionStates.permissions).filter { (_, state) ->
-        !state.status.isGranted && !state.status.shouldShowRationale
+      return all.zip(permissionStates.permissions).filter { (permission, state) ->
+        // Double-check actual system permission state to avoid showing dialog
+        // when permission is already granted (Accompanist state may lag behind)
+        val actuallyGranted = permission.name.isEmpty() ||
+            ContextCompat.checkSelfPermission(context, permission.name) == PackageManager.PERMISSION_GRANTED
+        !actuallyGranted && !state.status.isGranted && !state.status.shouldShowRationale
       }
     }
 
