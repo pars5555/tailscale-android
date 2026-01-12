@@ -245,32 +245,38 @@ class TailscaleProvider : ContentProvider() {
                 }
 
                 METHOD_DISALLOW_APP -> {
+                    // Execute synchronously for immediate effect
                     val packageName = arg
                     if (packageName.isNullOrEmpty()) {
                         result.putBoolean(KEY_SUCCESS, false)
                         result.putString(KEY_ERROR, "package name is required")
                     } else {
-                        val workData = Data.Builder()
-                            .putString(DisallowAppWorker.PACKAGE_NAME, packageName)
-                            .putString(DisallowAppWorker.ACTION, DisallowAppWorker.ACTION_ADD)
-                            .build()
-                        enqueueWork(DisallowAppWorker::class.java, workData)
-                        result.putBoolean(KEY_SUCCESS, true)
+                        val ctx = context
+                        if (ctx != null) {
+                            DisallowedAppsManager.addDisallowedApp(ctx, packageName)
+                            result.putBoolean(KEY_SUCCESS, true)
+                        } else {
+                            result.putBoolean(KEY_SUCCESS, false)
+                            result.putString(KEY_ERROR, "context is null")
+                        }
                     }
                 }
 
                 METHOD_ALLOW_APP -> {
+                    // Execute synchronously for immediate effect
                     val packageName = arg
                     if (packageName.isNullOrEmpty()) {
                         result.putBoolean(KEY_SUCCESS, false)
                         result.putString(KEY_ERROR, "package name is required")
                     } else {
-                        val workData = Data.Builder()
-                            .putString(DisallowAppWorker.PACKAGE_NAME, packageName)
-                            .putString(DisallowAppWorker.ACTION, DisallowAppWorker.ACTION_REMOVE)
-                            .build()
-                        enqueueWork(DisallowAppWorker::class.java, workData)
-                        result.putBoolean(KEY_SUCCESS, true)
+                        val ctx = context
+                        if (ctx != null) {
+                            DisallowedAppsManager.removeDisallowedApp(ctx, packageName)
+                            result.putBoolean(KEY_SUCCESS, true)
+                        } else {
+                            result.putBoolean(KEY_SUCCESS, false)
+                            result.putString(KEY_ERROR, "context is null")
+                        }
                     }
                 }
 
